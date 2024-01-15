@@ -3,6 +3,15 @@ import datetime as dt
 from pprint import pprint
 
 
+def sum_time(time_1, time_2):
+    hours = time_1.hour + time_2.hour
+    minutes = time_1.minute + time_2.minute
+    if minutes >= 60:
+        hours += minutes // 60
+        minutes = minutes % 60
+    return dt.time(hours, minutes)
+
+
 busy = [
     {'start': '10:30',
      'stop': '10:50'},
@@ -16,26 +25,29 @@ busy = [
      'stop': '20:20'},
 ]
 
-busy_datetime = []
+busy_time = []
 for item in busy:
-    start_time = dt.datetime.strptime(item['start'], '%H:%M').time()
-    stop_time = dt.datetime.strptime(item['stop'], '%H:%M').time()
-    busy_datetime.append((start_time, stop_time))
-pprint(busy_datetime)
+    start_busy = dt.time.fromisoformat(item['start'])
+    stop_busy = dt.time.fromisoformat(item['stop'])
+    busy_time.append((start_busy, stop_busy))
 
-start_time = dt.datetime.strptime('09:00', '%H:%M').time()
-end_time = dt.datetime.strptime('21:00', '%H:%M').time()
-busy_datetime.sort()
-window_for_work = dt.datetime.strptime('00:30', '%H:%M').time()
+start_time = dt.time.fromisoformat('09:00')
+end_time = dt.time.fromisoformat('21:00')
+busy_time.sort()
+window_for_work = dt.time.fromisoformat('00:30')
 windows = []
 while start_time < end_time:
-    for item in busy_datetime:
-        if start_time < item[0] and item[1] > start_time + window_for_work:
-            windows.append((start_time, start_time + window_for_work))
-            start_time += window_for_work
-        elif start_time < item[0] and item[1] <= start_time + window_for_work:
+    for item in busy_time:
+        while start_time < item[0] and item[0] >= sum_time(start_time, window_for_work):
+            time = sum_time(start_time, window_for_work)
+            windows.append((start_time, time))
+            start_time = time
+        if start_time < end_time:
             start_time = item[1]
         else:
-            start_time += window_for_work
-            
-pprint(windows)
+            break
+    if start_time < end_time and sum_time(start_time, window_for_work) < end_time:
+        windows.append((start_time, sum_time(start_time, window_for_work)))
+        break
+for start, end in windows:
+    pprint(f'{start.strftime("%H:%M")} - {end.strftime("%H:%M")}')
