@@ -38,7 +38,8 @@ window_for_work = dt.time.fromisoformat('00:30')
 windows = []
 while start_time < end_time:
     for item in busy_time:
-        while start_time < item[0] and item[0] >= sum_time(start_time, window_for_work):
+        while start_time < item[0] and item[0] >= sum_time(
+                start_time, window_for_work):
             time = sum_time(start_time, window_for_work)
             windows.append((start_time, time))
             start_time = time
@@ -46,8 +47,11 @@ while start_time < end_time:
             start_time = item[1]
         else:
             break
-    if start_time < end_time and sum_time(start_time, window_for_work) < end_time:
+    if start_time < end_time and sum_time(
+            start_time, window_for_work) < end_time:
         windows.append((start_time, sum_time(start_time, window_for_work)))
         break
+
+print(f'Количество свободных номерков у доктора - {len(windows)}.')
 for start, end in windows:
     pprint(f'{start.strftime("%H:%M")} - {end.strftime("%H:%M")}')
